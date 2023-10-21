@@ -9,7 +9,7 @@ export const authOptions: AuthOptions = {
       name: "Credentials",
       credentials: {},
       async authorize(credentials, req) {
-        if (typeof credentials !== "undefined")
+        if (typeof credentials !== "undefined") {
           try {
             process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
             const response: any = await fetch(
@@ -23,10 +23,13 @@ export const authOptions: AuthOptions = {
               }
             );
             const user = await response?.json();
-            console.info("useruseruseruseruseruser ???", user);
 
             if (typeof user !== "undefined") {
-              return { ...user.user, apiToken: user.token };
+              return {
+                ...user.user,
+                // name: user.user.userName,
+                apiToken: user.token,
+              };
             } else {
               return null;
             }
@@ -34,12 +37,40 @@ export const authOptions: AuthOptions = {
             console.error(e);
             return null;
           }
-        else {
+        } else {
           return null;
         }
       },
     }),
   ],
+  callbacks: {
+    async jwt({ token, user, session }: any) {
+      if (user) {
+        token.accessToken = user.apiToken;
+        // token.refreshToken = user.refreshToken;
+        token.role = user.role;
+        token.userName = user.userName;
+        token.id = user.id;
+      }
+      return token;
+    },
+
+    //  The session receives the token from JWT
+    async session({ session, token, user }: any) {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          userName: token.userName,
+          accessToken: token.accessToken as string,
+          refreshToken: token.refreshToken as string,
+          role: token.role,
+          id: token.id,
+        },
+        error: token.error,
+      };
+    },
+  },
   pages: {
     signIn: "/signIn",
   },
