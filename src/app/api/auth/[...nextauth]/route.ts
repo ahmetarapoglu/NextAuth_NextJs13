@@ -22,7 +22,9 @@ export const authOptions: AuthOptions = {
                 body: JSON.stringify(credentials),
               }
             );
-            const user = await response.json();
+            const user = await response?.json();
+            console.info("useruseruseruseruseruser ???", user);
+
             if (typeof user !== "undefined") {
               return { ...user.user, apiToken: user.token };
             } else {

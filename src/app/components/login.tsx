@@ -1,70 +1,92 @@
 "use client";
-import React, { useRef } from "react";
-import { Button } from "./Button";
-import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import InputBox from "./InputBox ";
+import { Button, Checkbox, Form, Input, Image, message } from 'antd';
+import { useState } from "react";
 
-type Props = {
-    className?: string;
-    callbackUrl?: string;
-    error?: string;
+type FieldType = {
+    userName?: string;
+    password?: string;
+    remember?: string;
 };
 
-const Login = (props: Props) => {
+const Login = () => {
     const router = useRouter();
-    const userName = useRef("");
-    const pass = useRef("");
-    const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    const [loading, setLoading] = useState(false)
+
+    const onFinish = async (values: any) => {
+        setLoading(true);
+
         const res = await signIn("credentials", {
-            userName: userName.current,
-            password: pass.current,
+            userName: values.userName,
+            password: values.password,
             redirect: false,
             callbackUrl: '/'
         });
+        setLoading(false);
         if (res?.status === 401) {
-            alert("Login failed - please try again - Not authenticated.")
+            message.error('Username or password is incorrect - please try again', 1.5)
         }
         if (!res?.error) {
-            router.push(props.callbackUrl ?? "http://localhost:3000");
+            message.success('Login Authenticated', 1.5)
+            router.push("http://localhost:3000");
         }
     };
+
+    const onFinishFailed = (errorInfo: any) => {
+        console.log('Failed:', errorInfo);
+    };
     return (
-        <div className={props.className}>
-            <div className="bg-gradient-to-b  from-slate-50 to-slate-200 p-2 text-center text-slate-600">
-                Login Form
+        <div className='login'>
+            <div className="logo">
+                <Image
+                    width={"65px"}
+                    src="/images/login.webp"
+                    preview={false}
+                    alt="no-image"
+                />
             </div>
-            {!!props.error && (
-                <p className="bg-red-100 text-red-600 text-center p-2">
-                    Authentication Failed
-                </p>
-            )}
-            <form onSubmit={onSubmit} className="p-2 flex flex-col gap-3">
-                <InputBox
-                    name="username"
-                    labelText="User Name"
-                    onChange={(e) => (userName.current = e.target.value)}
-                />
-                <InputBox
+            <h3 className='title'>Sign In</h3>
+            <Form
+                name="basic"
+                labelCol={{ span: 24 }}
+                wrapperCol={{ span: 24 }}
+                style={{ maxWidth: 800 }}
+                initialValues={{ remember: true }}
+                onFinish={onFinish}
+                onFinishFailed={onFinishFailed}
+                autoComplete="off"
+            >
+                <Form.Item<FieldType>
+                    label="Username"
+                    name="userName"
+                    rules={[{ required: true, message: 'Please input your username!' }]}
+                >
+                    <Input />
+                </Form.Item>
+
+                <Form.Item<FieldType>
+                    label="Password"
                     name="password"
-                    type="password"
-                    labelText="Password"
-                    onChange={(e) => (pass.current = e.target.value)}
-                />
-                <div className="flex items-center justify-center mt-2 gap-2">
-                    <Button type="submit" className="w-28">
-                        Sign In
+                    rules={[{ required: true, message: 'Please input your password!' }]}
+                >
+                    <Input.Password />
+                </Form.Item>
+
+                <Form.Item<FieldType>
+                    name="remember"
+                    valuePropName="checked"
+                    wrapperCol={{ offset: 0, span: 24 }}
+                >
+                    <Checkbox>Remember me</Checkbox>
+                </Form.Item>
+
+                <Form.Item wrapperCol={{ offset: 0, span: 24 }} style={{ width: "100%" }}>
+                    <Button type="primary" htmlType="submit" loading={loading} style={{ width: "100%" }}>
+                        Submit
                     </Button>
-                    <Link
-                        href={props.callbackUrl ?? "/"}
-                        className="w-28 border border-red-600 text-center py-2 rounded-md text-red-600 transition hover:bg-red-600 hover:text-white hover:border-transparent active:scale-95"
-                    >
-                        Cancel
-                    </Link>
-                </div>
-            </form>
+                </Form.Item>
+            </Form>
         </div>
     );
 };

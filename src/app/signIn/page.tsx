@@ -1,16 +1,16 @@
 import React from "react";
 import Login from "../components/login";
 
-type Props = {
-    searchParams?: Record<"callbackUrl" | "error", string>;
-};
-
-const SignInPage = (props: Props) => {
+const SignInPage = () => {
     return (
-        <Login
-            error={props.searchParams?.error}
-            callbackUrl={props.searchParams?.callbackUrl}
-        />
+        <>
+            <Login />
+            <footer className="footer">
+                <div className="copyright-text">
+                    NextAuth ©2023 Created By AR7B.
+                </div>
+            </footer>
+        </>
     );
 };
 
