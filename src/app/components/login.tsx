@@ -56,7 +56,7 @@ const Login = () => {
                 initialValues={{ remember: true }}
                 onFinish={onFinish}
                 onFinishFailed={onFinishFailed}
-                autoComplete="off"
+                autoComplete="on"
             >
                 <Form.Item<FieldType>
                     label="Username"

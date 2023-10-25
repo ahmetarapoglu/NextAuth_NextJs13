@@ -13,8 +13,10 @@ export default function Home() {
     router.push("/signIn")
   };
 
-  if (status != "authenticated") {
-    router.push("signIn")
+
+  if (session == null) {
+    router.push("/signIn")
+    return
   }
   return (
     <>
